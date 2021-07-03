@@ -9,8 +9,8 @@ env:
   PROJECT_ID: ${{ secrets.GCR_PROJECT }}
   RUN_REGION: us-central1
   SERVICE_NAME: myservice
-  PR_NUMBER: $(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
-  SHA_SHORT: $(git rev-parse --short HEAD)
+  PR_NUMBER: echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }'
+  SHA_SHORT: git rev-parse --short HEAD
 
 jobs:
   build:
