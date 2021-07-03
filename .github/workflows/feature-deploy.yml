@@ -63,13 +63,14 @@ jobs:
             --tag "gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$SHA_SHORT"
 
       # Deploy image to Cloud Run
-      - name: Deploy GCR
-        run: |-
-          gcloud run deploy "$SERVICE_NAME" \
-            --quiet \
-            --region "$RUN_REGION" \
-            --image "gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$SHA_SHORT" \
-            --platform "managed" \
-            --allow-unauthenticated \
-            --tag pr-$PR_NUMBER \
-            --no-traffic
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@main
+        with:
+          project_id: $PROJECT_ID
+          service: $SERVICE_NAME
+          image: gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$SHA_SHORT
+          region: $RUN_REGION
+          credentials: ${{ secrets.GCR_SA_KEY }}
+          tag: pr-$PR_NUMBER
+          no_traffic: true
