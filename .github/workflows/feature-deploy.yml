@@ -9,8 +9,6 @@ env:
   PROJECT_ID: ${{ secrets.GCR_PROJECT }}
   RUN_REGION: us-central1
   SERVICE_NAME: myservice
-  PR_NUMBER: echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }'
-  SHA_SHORT: git rev-parse --short HEAD
 
 jobs:
   build:
@@ -44,6 +42,11 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@main
+
+      - name: Add Env Variables
+        run: |
+          echo "PR_NUMBER=`echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }'`" >> $GITHUB_ENV
+          echo "SHA_SHORT=`git rev-parse --short HEAD`" >> $GITHUB_ENV
 
       - name: Setup gcloud CLI
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
