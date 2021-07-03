@@ -33,7 +33,7 @@ jobs:
 
   deploy-gcr:
     name: Deploy to GCR
-    needs: build-docker
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
