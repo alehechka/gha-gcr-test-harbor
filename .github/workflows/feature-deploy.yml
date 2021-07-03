@@ -65,7 +65,7 @@ jobs:
       # Deploy image to Cloud Run
       - name: Deploy GCR
         run: |-
-          gcloud run deploy "$SERVICE_NAME" \
+          gcloud beta run deploy "$SERVICE_NAME" \
             --quiet \
             --region "$RUN_REGION" \
             --image "gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$SHA_SHORT" \
