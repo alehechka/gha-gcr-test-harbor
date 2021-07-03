@@ -62,7 +62,7 @@ jobs:
         run: gcloud auth configure-docker
 
       - name: Dockerize
-        run: docker build -t ${{ env.IMAGE }}
+        run: docker build -t ${{ env.IMAGE }} .
 
       - name: Push Docker image
         run: docker push ${{ env.IMAGE }}
