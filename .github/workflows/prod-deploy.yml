@@ -3,7 +3,7 @@ name: Google Cloud Run Deploy
 on:
   push:
     branches:
-      - dev
+      - main
 
 env:
   PROJECT_ID: ${{ secrets.GCR_PROJECT }}
@@ -19,16 +19,17 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@main
 
-      - name: Set up Go 1.13
+      - name: Set up Go 1.16
         uses: actions/setup-go@v1
         with:
-          go-version: 1.13
+          go-version: 1.16
         id: go
 
+      - name: Install Dependencies
+      - run: go get -d -v
+
       - name: Build
-        run: |
-          go get -d -v
-          go build -v .
+        run: go build -v .
 
   deploy-gcr:
     name: Deploy to GCR
