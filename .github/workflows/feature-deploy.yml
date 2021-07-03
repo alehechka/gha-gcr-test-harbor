@@ -1,0 +1,79 @@
+name: Google Cloud Run Revision Deploy
+# https://github.com/google-github-actions/setup-gcloud
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: ${{ secrets.GCR_PROJECT }}
+  RUN_REGION: us-central1
+  SERVICE_NAME: myservice
+
+jobs:
+  build:
+    name: Test Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@main
+
+      - name: Set up Go 1.16
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.16
+        id: go
+
+      - name: Install Dependencies
+        run: go get -d -v
+
+      - name: Run Tests
+        run: go test ./...
+
+      - name: Build
+        run: go build -v .
+
+  deploy-gcr:
+    name: Deploy Revision Tag to GCR
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@main
+
+      - name: Create Env Variables
+        run: |
+          echo "PR_NUMBER=`echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }'`" >> $GITHUB_ENV
+          echo "SHA_SHORT=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+
+      - name: Create Docker Tag
+        run: echo "IMAGE=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$SHA_SHORT" >> $GITHUB_ENV
+
+      - name: Setup gcloud CLI
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.GCR_SA_KEY }}
+          project_id: ${{ secrets.GCR_PROJECT }}
+          export_default_credentials: true
+
+      - name: Authorize Docker push
+        run: gcloud auth configure-docker
+
+      - name: Dockerize
+        run: docker build -t ${{ env.IMAGE }} .
+
+      - name: Push Docker image
+        run: docker push ${{ env.IMAGE }}
+
+      # Deploy image to Cloud Run
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@main
+        with:
+          service: ${{ env.SERVICE_NAME }}
+          image: ${{ env.IMAGE }}
+          region: ${{ env.RUN_REGION }}
+          tag: pr-${{ env.PR_NUMBER }}
+          no_traffic: true
