@@ -60,11 +60,11 @@ jobs:
         run: docker push ${{ env.IMAGE }}
 
       # Deploy image to Cloud Run
-      - name: Deploy GCR
-        run: |-
-          gcloud run deploy "$SERVICE_NAME" \
-            --quiet \
-            --region "$RUN_REGION" \
-            --image "$IMAGE" \
-            --platform "managed" \
-            --allow-unauthenticated
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@main
+        with:
+          service: ${{ env.SERVICE_NAME }}
+          image: ${{ env.IMAGE }}
+          region: ${{ env.RUN_REGION }}
+          revision_traffic: latest=100
