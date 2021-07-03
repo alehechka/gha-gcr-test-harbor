@@ -26,7 +26,7 @@ jobs:
         id: go
 
       - name: Install Dependencies
-      - run: go get -d -v
+        run: go get -d -v
 
       - name: Build
         run: go build -v .
