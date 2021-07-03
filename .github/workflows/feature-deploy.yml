@@ -43,10 +43,11 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@main
 
-      - name: Add Env Variables
+      - name: Create Env Variables
         run: |
           echo "PR_NUMBER=`echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }'`" >> $GITHUB_ENV
           echo "SHA_SHORT=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+          echo "IMAGE=`gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$SHA_SHORT`" >> $GITHUB_ENV
 
       - name: Setup gcloud CLI
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
@@ -55,12 +56,14 @@ jobs:
           project_id: ${{ secrets.GCR_PROJECT }}
           export_default_credentials: true
 
-      # Build and push image to Google Container Registry
-      - name: Build & Push
-        run: |-
-          gcloud builds submit \
-            --quiet \
-            --tag "gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$SHA_SHORT"
+      - name: Authorize Docker push
+        run: gcloud auth configure-docker
+
+      - name: Dockerize
+        run: docker build -t ${{ env.IMAGE }}
+
+      - name: Push Docker image
+        run: docker push ${{ env.IMAGE }}
 
       # Deploy image to Cloud Run
       - name: Deploy to Cloud Run
@@ -68,7 +71,7 @@ jobs:
         uses: google-github-actions/deploy-cloudrun@main
         with:
           service: ${{ env.SERVICE_NAME }}
-          image: gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ env.PR_NUMBER }}-${{ env.SHA_SHORT }}
+          image: ${{ env.IMAGE }}
           region: ${{ env.RUN_REGION }}
           tag: pr-${{ env.PR_NUMBER }}
           no_traffic: true
