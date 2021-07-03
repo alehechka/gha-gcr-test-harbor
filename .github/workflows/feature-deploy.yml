@@ -67,8 +67,8 @@ jobs:
         id: deploy
         uses: google-github-actions/deploy-cloudrun@main
         with:
-          service: $SERVICE_NAME
-          image: gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$SHA_SHORT
-          region: $RUN_REGION
-          tag: pr-$PR_NUMBER
+          service: ${{ env.SERVICE_NAME }}
+          image: gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ env.PR_NUMBER }}-${{ env.SHA_SHORT }}
+          region: ${{ env.RUN_REGION }}
+          tag: pr-${{ env.PR_NUMBER }}
           no_traffic: true
