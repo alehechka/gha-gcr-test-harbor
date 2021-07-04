@@ -59,7 +59,15 @@ jobs:
       - name: Push Docker image
         run: docker push ${{ env.IMAGE }}
 
-      # Deploy image to Cloud Run
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@main
+        with:
+          service: ${{ env.SERVICE_NAME }}
+          image: ${{ env.IMAGE }}
+          region: ${{ env.RUN_REGION }}
+
+      # Update traffic to latest
       - name: Deploy to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@main
