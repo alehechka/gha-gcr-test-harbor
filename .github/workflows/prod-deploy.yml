@@ -67,9 +67,8 @@ jobs:
           image: ${{ env.IMAGE }}
           region: ${{ env.RUN_REGION }}
 
-      # Update traffic to latest
-      - name: Deploy to Cloud Run
-        id: deploy
+      - name: Update traffic to latest
+        id: update_traffic
         uses: google-github-actions/deploy-cloudrun@main
         with:
           service: ${{ env.SERVICE_NAME }}
