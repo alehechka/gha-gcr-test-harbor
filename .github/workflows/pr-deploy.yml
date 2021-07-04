@@ -2,6 +2,8 @@ name: Google Cloud Run Revision Deploy
 # https://github.com/google-github-actions/setup-gcloud
 on:
   pull_request:
+    types:
+      - closed
     branches:
       - main
 
@@ -84,8 +86,3 @@ jobs:
         with:
           message: |
             Feature Branch: ${{ steps.deploy.outputs.url }}
-
-      - name: List Revisions
-        run: |-
-          gcloud run revisions list \
-            --service "${SERVICE_NAME}"
