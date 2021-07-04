@@ -35,11 +35,11 @@ jobs:
           project_id: ${{ secrets.GCR_PROJECT }}
           export_default_credentials: true
 
-      - name: Remove PR Tags
-        run: |-
-          gcloud run services update-traffic "${SERVICE_NAME}" \
-            --region "${RUN_REGION}" \
-            --remove-tags "pr-${PR_NUMBER}"
+      # - name: Remove PR Tags
+      #   run: |-
+      #     gcloud run services update-traffic "${SERVICE_NAME}" \
+      #       --region "${RUN_REGION}" \
+      #       --remove-tags "pr-${PR_NUMBER}"
 
       - name: Set Revisions Env Variable
         run: |-
