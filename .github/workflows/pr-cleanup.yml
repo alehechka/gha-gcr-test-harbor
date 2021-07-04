@@ -39,7 +39,16 @@ jobs:
         run: |-
           gcloud run services update-traffic "${SERVICE_NAME}" \
             --region "${RUN_REGION}" \
-            --remove-tags ["pr-${PR_NUMBER}"]
+            --remove-tags "pr-${PR_NUMBER}"
+
+      - name: Testing print out
+        run: |-
+          gcloud run revisions list \
+            --service "${SERVICE_NAME}" \
+            --region "${RUN_REGION}" \
+            --filter "spec.containers.image ~ ${IMAGE_REGX}" \
+            --format "csv[no-heading](metadata.name)" \
+            | awk -vORS=, '{ print $1 }'
 
       - name: Set Revisions Env Variable
         run: |-
@@ -47,7 +56,8 @@ jobs:
             --service "${SERVICE_NAME}" \
             --region "${RUN_REGION}" \
             --filter "spec.containers.image ~ ${IMAGE_REGX}" \
-            --format "csv[no-heading](metadata.name)"`" >> $GITHUB_ENV
+            --format "csv[no-heading](metadata.name)" \
+            | awk -vORS=, '{ print $1 }'`" >> $GITHUB_ENV
 
       - name: Print Variables
         run: |-
