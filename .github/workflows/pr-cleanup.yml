@@ -52,6 +52,7 @@ jobs:
             | awk -vORS=, '{ print $1 }' \
             | sed 's/,$//'`" >> $GITHUB_ENV
 
+      # Skip most recent revision (unable to delete)
       - name: Delete unused revision instances
         run: |-
           i=-1
@@ -59,7 +60,6 @@ jobs:
           do
             ((i++))
             if [[ "$i" == 0 ]]; then
-              # Skip most recent revision (unable to delete)
               continue
             fi
             gcloud run revisions delete "${revision}" --region "${RUN_REGION}" --quiet
