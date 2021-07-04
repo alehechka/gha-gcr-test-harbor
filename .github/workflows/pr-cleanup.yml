@@ -51,7 +51,7 @@ jobs:
             --sort-by=~metadata.name \
             | awk -vORS=, '{ print $1 }' \
             | sed 's/,$//' \
-            | sed 's/^[^,]*=//'`" >> $GITHUB_ENV
+            | sed 's/^[^,]*,//'`" >> $GITHUB_ENV
 
       # Skip most recent revision (unable to delete)
       - name: Delete unused revision instances
