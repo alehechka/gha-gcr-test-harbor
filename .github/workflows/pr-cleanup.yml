@@ -37,8 +37,7 @@ jobs:
 
       - name: Remove PR Tags
         run: |-
-          gcloud run services update-traffic \
-            --service "${SERVICE_NAME}" \
+          gcloud run services update-traffic "${SERVICE_NAME}" \
             --region "${RUN_REGION}" \
             --remove-tags ["pr-${PR_NUMBER}"]
 
