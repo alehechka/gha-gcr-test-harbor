@@ -1,8 +1,8 @@
 name: Google Cloud Run PR Close Cleanup
 on:
   pull_request:
-    types:
-      - closed
+    # types:
+    #   - closed
     branches:
       - main
 
@@ -23,13 +23,10 @@ jobs:
       - name: Create Env Variables
         run: |
           echo "PR_NUMBER=`echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }'`" >> $GITHUB_ENV
-          echo "SHA_SHORT=`git rev-parse --short ${{ github.event.after }}`" >> $GITHUB_ENV
-          echo "PREV_SHA_SHORT=`git rev-parse --short ${{ github.event.before }}`" >> $GITHUB_ENV
 
       - name: Create Docker Tag
         run: |-
-          echo "IMAGE=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$SHA_SHORT" >> $GITHUB_ENV
-          echo "PREV_IMAGE=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$PREV_SHA_SHORT" >> $GITHUB_ENV
+          echo "IMAGE_REGX=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-*" >> $GITHUB_ENV
 
       - name: Setup gcloud CLI
         uses: google-github-actions/setup-gcloud@master
@@ -38,20 +35,19 @@ jobs:
           project_id: ${{ secrets.GCR_PROJECT }}
           export_default_credentials: true
 
-      - name: List Revisions
+      - name: Remove PR Tags
         run: |-
           gcloud run revisions list \
             --service "${SERVICE_NAME}" \
             --region "${RUN_REGION}" \
-            --filter "spec.containers.image:${PREV_IMAGE}" \
-            --format "csv[no-heading](metadata.name)"
+            --remove-tags ["pr-${PR_NUMBER}"]
 
       - name: Set Revision Env Variable
         run: |-
-          echo "REVISION=`gcloud run revisions list \
+          echo "REVISIONS=`gcloud run revisions list \
             --service "${SERVICE_NAME}" \
             --region "${RUN_REGION}" \
-            --filter "spec.containers.image:${PREV_IMAGE}" \
+            --filter "spec.containers.image ~ ${IMAGE_REGX}" \
             --format "csv[no-heading](metadata.name)"`" >> $GITHUB_ENV
 
       - name: Print Variables

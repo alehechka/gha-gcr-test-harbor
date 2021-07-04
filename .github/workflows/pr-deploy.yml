@@ -2,6 +2,8 @@ name: Google Cloud Run Revision Deploy
 # https://github.com/google-github-actions/setup-gcloud
 on:
   pull_request:
+    types:
+      - closed
     branches:
       - main
 
