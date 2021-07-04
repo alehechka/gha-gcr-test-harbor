@@ -67,7 +67,6 @@ jobs:
       - name: Push Docker image
         run: docker push ${{ env.IMAGE }}
 
-      # Deploy image to Cloud Run
       - name: Deploy to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@main
@@ -77,3 +76,10 @@ jobs:
           region: ${{ env.RUN_REGION }}
           tag: pr-${{ env.PR_NUMBER }}
           no_traffic: true
+
+      - uses: mshick/add-pr-comment@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          message: |
+            Feature Branch: ${{ steps.deploy.outputs.url }}
