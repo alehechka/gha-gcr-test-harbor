@@ -41,7 +41,7 @@ jobs:
             --service "${SERVICE_NAME}" \
             --region "${RUN_REGION}" \
             --filter "spec.containers.image:${IMAGE}" \
-            --format csv[no-heading](metadata.name)
+            --format "csv[no-heading](metadata.name)"
 
       - name: Set Revision Env Variable
         run: |-
@@ -49,7 +49,7 @@ jobs:
             --service "${SERVICE_NAME}" \
             --region "${RUN_REGION}" \
             --filter "spec.containers.image:${IMAGE}" \
-            --format csv[no-heading](metadata.name)`" >> $GITHUB_ENV
+            --format "csv[no-heading](metadata.name)"`" >> $GITHUB_ENV
 
       - name: Print Variables
         run: |-
