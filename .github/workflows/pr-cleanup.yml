@@ -41,15 +41,6 @@ jobs:
             --region "${RUN_REGION}" \
             --remove-tags "pr-${PR_NUMBER}"
 
-      - name: Testing print out
-        run: |-
-          gcloud run revisions list \
-            --service "${SERVICE_NAME}" \
-            --region "${RUN_REGION}" \
-            --filter "spec.containers.image ~ ${IMAGE_REGX}" \
-            --format "csv[no-heading](metadata.name)" \
-            | awk -vORS=, '{ print $1 }'
-
       - name: Set Revisions Env Variable
         run: |-
           echo "REVISIONS=`gcloud run revisions list \
@@ -57,8 +48,12 @@ jobs:
             --region "${RUN_REGION}" \
             --filter "spec.containers.image ~ ${IMAGE_REGX}" \
             --format "csv[no-heading](metadata.name)" \
-            | awk -vORS=, '{ print $1 }'`" >> $GITHUB_ENV
+            | awk -vORS=, '{ print $1 }' \
+            | sed 's/,$//'`" >> $GITHUB_ENV
 
-      - name: Print Variables
+      - name: Delete unused revision instances
         run: |-
-          echo "${REVISIONS}"
+          for revision in $(echo $REVISIONS | sed "s/,/ /g")
+          do
+            gcloud run revisions delete "${revision}" --region "${RUN_REGION}" --quiet
+          done
