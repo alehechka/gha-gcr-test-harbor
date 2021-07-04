@@ -62,5 +62,6 @@ jobs:
             if [[ "$i" == 0 ]]; then
               continue
             fi
+            echo "$i:$revision"
             gcloud run revisions delete "${revision}" --region "${RUN_REGION}" --quiet
           done
