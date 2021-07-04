@@ -2,8 +2,8 @@ name: Google Cloud Run Revision Deploy
 # https://github.com/google-github-actions/setup-gcloud
 on:
   pull_request:
-    types:
-      - closed
+    # types:
+    #   - closed
     branches:
       - main
 
@@ -86,3 +86,18 @@ jobs:
         with:
           message: |
             Feature Branch: ${{ steps.deploy.outputs.url }}
+
+      - name: Set Revision Env Variable
+        run: |-
+          echo "REVISIONS=`gcloud run revisions list \
+            --service "${SERVICE_NAME}" \
+            --region "${RUN_REGION}" \
+            --filter "spec.containers.image:${PREV_IMAGE}" \
+            --format "csv[no-heading](metadata.name)"`" >> $GITHUB_ENV
+
+      - name: Delete prior revision instances
+        run: |-
+          for revision in $(echo $REVISIONS | sed "s/,/ /g")
+          do
+            gcloud run revisions delete "${revision}"
+          done
