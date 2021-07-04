@@ -77,7 +77,8 @@ jobs:
           tag: pr-${{ env.PR_NUMBER }}
           no_traffic: true
 
-      - uses: mshick/add-pr-comment@v1
+      - name: Add PR comment
+        uses: mshick/add-pr-comment@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
