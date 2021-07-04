@@ -50,18 +50,13 @@ jobs:
             --format "csv[no-heading](metadata.name)" \
             --sort-by=~metadata.name \
             | awk -vORS=, '{ print $1 }' \
-            | sed 's/,$//'`" >> $GITHUB_ENV
+            | sed 's/,$//' \
+            | sed 's/^[^,]*=//'`" >> $GITHUB_ENV
 
       # Skip most recent revision (unable to delete)
       - name: Delete unused revision instances
         run: |-
-          i=-1
           for revision in $(echo $REVISIONS | sed "s/,/ /g")
           do
-            ((i++))
-            if [[ "$i" == 0 ]]; then
-              continue
-            fi
-            echo "$i:$revision"
             gcloud run revisions delete "${revision}" --region "${RUN_REGION}" --quiet
           done
