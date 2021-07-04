@@ -20,6 +20,11 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@main
 
+      - name: Create Env Variables
+        run: |
+          echo "PR_NUMBER=`echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }'`" >> $GITHUB_ENV
+          echo "SHA_SHORT=`git rev-parse --short HEAD`" >> $GITHUB_ENV
+
       - name: Setup gcloud CLI
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
@@ -31,4 +36,5 @@ jobs:
         run: |-
           gcloud run revisions list \
             --service "${SERVICE_NAME}" \
-            --region "${RUN_REGION}"
+            --region "${RUN_REGION}" \
+            --filter "tags.items=pr-${PR_NUMBER}"
