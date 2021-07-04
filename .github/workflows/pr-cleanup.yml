@@ -1,8 +1,8 @@
 name: Google Cloud Run PR Close Cleanup
 on:
   pull_request:
-    # types:
-    #   - closed
+    types:
+      - closed
     branches:
       - main
 

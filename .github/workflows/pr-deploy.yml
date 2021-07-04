@@ -121,5 +121,5 @@ jobs:
         run: |-
           for revision in $(echo $REVISIONS | sed "s/,/ /g")
           do
-            gcloud run revisions delete "${revision}" --region "${RUN_REGION}"
+            gcloud run revisions delete "${revision}" --region "${RUN_REGION} --quiet"
           done
