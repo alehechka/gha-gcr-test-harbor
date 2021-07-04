@@ -84,3 +84,8 @@ jobs:
         with:
           message: |
             Feature Branch: ${{ steps.deploy.outputs.url }}
+
+      - name: List Revisions
+        run: |-
+          gcloud run revisions list \
+            --service "${SERVICE_NAME}"
