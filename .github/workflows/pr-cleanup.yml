@@ -37,12 +37,12 @@ jobs:
 
       - name: Remove PR Tags
         run: |-
-          gcloud run revisions list \
+          gcloud run services update-traffic \
             --service "${SERVICE_NAME}" \
             --region "${RUN_REGION}" \
             --remove-tags ["pr-${PR_NUMBER}"]
 
-      - name: Set Revision Env Variable
+      - name: Set Revisions Env Variable
         run: |-
           echo "REVISIONS=`gcloud run revisions list \
             --service "${SERVICE_NAME}" \
@@ -52,4 +52,4 @@ jobs:
 
       - name: Print Variables
         run: |-
-          echo "${REVISION}"
+          echo "${REVISIONS}"
