@@ -52,7 +52,7 @@ jobs:
         run: echo "IMAGE=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$SHA_SHORT" >> $GITHUB_ENV
 
       - name: Setup gcloud CLI
-        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@master
         with:
           service_account_key: ${{ secrets.GCR_SA_KEY }}
           project_id: ${{ secrets.GCR_PROJECT }}
@@ -103,7 +103,7 @@ jobs:
         run: echo "PREV_IMAGE=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$PREV_SHA_SHORT" >> $GITHUB_ENV
 
       - name: Setup gcloud CLI
-        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@master
         with:
           service_account_key: ${{ secrets.GCR_SA_KEY }}
           project_id: ${{ secrets.GCR_PROJECT }}
@@ -121,5 +121,5 @@ jobs:
         run: |-
           for revision in $(echo $REVISIONS | sed "s/,/ /g")
           do
-            gcloud run revisions delete "${revision}" --region "${RUN_REGION} --quiet"
+            gcloud run revisions delete "${revision}" --region "${RUN_REGION}" --quiet
           done
