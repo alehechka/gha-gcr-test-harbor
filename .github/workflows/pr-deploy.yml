@@ -49,7 +49,9 @@ jobs:
           echo "SHA_SHORT=`git rev-parse --short ${{ github.event.after }}`" >> $GITHUB_ENV
 
       - name: Create Docker Tag
-        run: echo "IMAGE=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$SHA_SHORT" >> $GITHUB_ENV
+        run: |-
+          echo "IMAGE=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$SHA_SHORT" >> $GITHUB_ENV
+          echo "PREV_IMAGE=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$PREV_SHA_SHORT" >> $GITHUB_ENV
 
       - name: Setup gcloud CLI
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
