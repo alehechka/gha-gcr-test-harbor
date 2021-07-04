@@ -48,12 +48,19 @@ jobs:
             --region "${RUN_REGION}" \
             --filter "spec.containers.image ~ ${IMAGE_REGX}" \
             --format "csv[no-heading](metadata.name)" \
+            --sort-by=~metadata.name \
             | awk -vORS=, '{ print $1 }' \
             | sed 's/,$//'`" >> $GITHUB_ENV
 
       - name: Delete unused revision instances
         run: |-
+          i=-1
           for revision in $(echo $REVISIONS | sed "s/,/ /g")
           do
+            ((i++))
+            if [[ "$i" == 0 ]]; then
+              # Skip most recent revision (unable to delete)
+              continue
+            fi
             gcloud run revisions delete "${revision}" --region "${RUN_REGION}" --quiet
           done
