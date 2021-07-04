@@ -34,24 +34,30 @@ jobs:
       - name: Build
         run: go build -v .
 
-  deploy-gcr:
-    name: Deploy Revision Tag to GCR
-    needs: build
+  prep-env:
+    name: Initialize Environment Variables
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@main
-
       - name: Create Env Variables
         run: |
           echo "PR_NUMBER=`echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }'`" >> $GITHUB_ENV
           echo "SHA_SHORT=`git rev-parse --short ${{ github.event.after }}`" >> $GITHUB_ENV
+          echo "PREV_SHA_SHORT=`git rev-parse --short ${{ github.event.before }}`" >> $GITHUB_ENV
 
       - name: Create Docker Tag
         run: |-
           echo "IMAGE=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$SHA_SHORT" >> $GITHUB_ENV
           echo "PREV_IMAGE=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$PREV_SHA_SHORT" >> $GITHUB_ENV
+
+  deploy-gcr:
+    name: Deploy Revision Tag to GCR
+    needs: [build, prep-env]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@main
 
       - name: Setup gcloud CLI
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
