@@ -93,7 +93,9 @@ jobs:
         uses: actions/checkout@main
 
       - name: Create Docker Regex Tag
-        run: echo "IMAGE_REGX=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-*" >> $GITHUB_ENV
+        run: |-
+          echo "IMAGE=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$SHA_SHORT" >> $GITHUB_ENV
+          echo "IMAGE_REGX=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-*" >> $GITHUB_ENV
 
       - name: Setup gcloud CLI
         uses: google-github-actions/setup-gcloud@master
@@ -107,12 +109,11 @@ jobs:
           echo "REVISIONS=`gcloud run revisions list \
             --service "${SERVICE_NAME}" \
             --region "${RUN_REGION}" \
-            --filter "spec.containers.image ~ ${IMAGE_REGX}" \
+            --filter "spec.containers.image ~ ${IMAGE_REGX} AND spec.containers.image != ${IMAGE}" \
             --format "csv[no-heading](metadata.name)" \
             --sort-by=~metadata.name \
             | awk -vORS=, '{ print $1 }' \
-            | sed 's/,$//' \
-            | sed 's/^[^,]*,//'`" >> $GITHUB_ENV
+            | sed 's/,$//'`" >> $GITHUB_ENV
 
       - name: Delete unused revision instances
         run: |-
