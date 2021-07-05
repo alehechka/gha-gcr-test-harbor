@@ -93,7 +93,7 @@ jobs:
         uses: actions/checkout@main
 
       - name: Create Docker Regex Tag
-        run: echo "IMAGE_REGX=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-*" >> $GITHUB_ENV
+        run: echo "IMAGE_REGX=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-.*" >> $GITHUB_ENV
 
       - name: Setup gcloud CLI
         uses: google-github-actions/setup-gcloud@master

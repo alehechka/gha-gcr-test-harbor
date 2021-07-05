@@ -93,7 +93,7 @@ jobs:
           export_default_credentials: true
 
       - name: Create Docker Regex Tag
-        run: echo "IMAGE_REGX=gcr.io/$PROJECT_ID/$SERVICE_NAME:[0-9]+-*" >> $GITHUB_ENV
+        run: echo "IMAGE_REGX=gcr.io/$PROJECT_ID/$SERVICE_NAME:[0-9]+-.*" >> $GITHUB_ENV
 
       - name: Set Revisions Env Variable
         run: |-
@@ -107,5 +107,9 @@ jobs:
             | awk -vORS=, '{ print $1 }' \
             | sed 's/,$//'`" >> $GITHUB_ENV
 
-      - name: Print Revisions
-        run: echo "${REVISIONS}"
+      - name: Delete unused revision instances
+        run: |-
+          for revision in $(echo $REVISIONS | sed "s/,/ /g")
+          do
+            gcloud run revisions delete "${revision}" --region "${RUN_REGION}" --quiet
+          done
