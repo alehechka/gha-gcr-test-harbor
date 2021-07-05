@@ -75,3 +75,37 @@ jobs:
           image: ${{ env.IMAGE }}
           region: ${{ env.RUN_REGION }}
           revision_traffic: LATEST=100
+
+  cleanup:
+    name: GCR PR Merge Cleanup
+    needs: deploy-gcr
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@main
+
+      - name: Setup gcloud CLI
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.GCR_SA_KEY }}
+          project_id: ${{ secrets.GCR_PROJECT }}
+          export_default_credentials: true
+
+      - name: Create Docker Regex Tag
+        run: echo "IMAGE_REGX=gcr.io/$PROJECT_ID/$SERVICE_NAME:[0-9]+-*" >> $GITHUB_ENV
+
+      - name: Set Revisions Env Variable
+        run: |-
+          echo "REVISIONS=`gcloud run revisions list \
+            --service "${SERVICE_NAME}" \
+            --region "${RUN_REGION}" \
+            --filter "spec.containers.image ~ ${IMAGE_REGX}" \
+            --format "csv[no-heading](REVISION,ACTIVE)" \
+            | awk -F, '$2 != "yes"' \
+            | sed 's/,$//' \
+            | awk -vORS=, '{ print $1 }' \
+            | sed 's/,$//'`" >> $GITHUB_ENV
+
+      - name: Print Revisions
+        run: echo "${REVISIONS}"
