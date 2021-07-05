@@ -21,10 +21,6 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@main
 
-      - name: Create Docker Tag
-        run: |-
-          echo "IMAGE_REGX=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-*" >> $GITHUB_ENV
-
       - name: Setup gcloud CLI
         uses: google-github-actions/setup-gcloud@master
         with:
@@ -32,22 +28,8 @@ jobs:
           project_id: ${{ secrets.GCR_PROJECT }}
           export_default_credentials: true
 
-      - name: Set Revisions Env Variable
+      - name: Remove PR Tags
         run: |-
-          echo "REVISIONS=`gcloud run revisions list \
-            --service "${SERVICE_NAME}" \
+          gcloud run services update-traffic "${SERVICE_NAME}" \
             --region "${RUN_REGION}" \
-            --filter "spec.containers.image ~ ${IMAGE_REGX}" \
-            --format "csv[no-heading](metadata.name)" \
-            --sort-by=~metadata.name \
-            | awk -vORS=, '{ print $1 }' \
-            | sed 's/,$//' \
-            | sed 's/^[^,]*,//'`" >> $GITHUB_ENV
-
-      # Skip most recent revision (unable to delete)
-      - name: Delete unused revision instances
-        run: |-
-          for revision in $(echo $REVISIONS | sed "s/,/ /g")
-          do
-            gcloud run revisions delete "${revision}" --region "${RUN_REGION}" --quiet
-          done
+            --remove-tags "pr-${PR_NUMBER}"
