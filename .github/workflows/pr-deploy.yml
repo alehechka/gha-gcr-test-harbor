@@ -112,7 +112,7 @@ jobs:
           echo "REVISIONS=`gcloud run revisions list \
             --service "${SERVICE_NAME}" \
             --region "${RUN_REGION}" \
-            --filter "spec.containers.image ~ ${PREV_IMAGE}" \
+            --filter "spec.containers.image:${PREV_IMAGE}" \
             --format "csv[no-heading](metadata.name)" \
             | awk -vORS=, '{ print $1 }' \
             | sed 's/,$//'`" >> $GITHUB_ENV
