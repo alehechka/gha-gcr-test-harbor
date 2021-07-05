@@ -10,6 +10,7 @@ env:
   PROJECT_ID: ${{ secrets.GCR_PROJECT }}
   RUN_REGION: us-central1
   SERVICE_NAME: myservice
+  PR_NUMBER: ${{ github.event.pull_request.number }}
 
 jobs:
   cleanup:
@@ -19,10 +20,6 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@main
-
-      - name: Create Env Variables
-        run: |
-          echo "PR_NUMBER=`echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }'`" >> $GITHUB_ENV
 
       - name: Create Docker Tag
         run: |-

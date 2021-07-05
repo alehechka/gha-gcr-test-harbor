@@ -8,6 +8,7 @@ env:
   PROJECT_ID: ${{ secrets.GCR_PROJECT }}
   RUN_REGION: us-central1
   SERVICE_NAME: myservice
+  PR_NUMBER: ${{ github.event.pull_request.number }}
 
 jobs:
   build:
@@ -43,9 +44,7 @@ jobs:
         uses: actions/checkout@main
 
       - name: Create Env Variables
-        run: |
-          echo "PR_NUMBER=`echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }'`" >> $GITHUB_ENV
-          echo "SHA_SHORT=`git rev-parse --short ${{ github.event.after }}`" >> $GITHUB_ENV
+        run: echo "SHA_SHORT=`git rev-parse --short ${{ github.event.after }}`" >> $GITHUB_ENV
 
       - name: Create Docker Tag
         run: echo "IMAGE=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-$SHA_SHORT" >> $GITHUB_ENV
