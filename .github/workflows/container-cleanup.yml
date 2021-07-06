@@ -49,5 +49,9 @@ jobs:
           | awk -vORS=, '{ print $1 }' \
           | sed 's/,$//'`" >> $GITHUB_ENV
 
-      - name: Printout Tags
-        run: echo "$TAGS"
+      - name: Delete unused Container Images
+        run: |-
+          for TAG in $(echo $TAGS | sed "s/,/ /g")
+          do
+            gcloud container images delete "${IMAGE}:${TAG}" --force-delete-tags --quiet
+          done
