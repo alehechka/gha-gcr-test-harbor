@@ -97,6 +97,11 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@main
 
+      - name: Print event
+        run: |-
+          echo ${{ github.event.pull_request }}
+          echo ${{ github.event.pull_request.action == 'synchronize' }}
+
       - name: Create Docker Regex Tag
         run: echo "IMAGE_REGX=gcr.io/$PROJECT_ID/$SERVICE_NAME:$PR_NUMBER-.*" >> $GITHUB_ENV
 
