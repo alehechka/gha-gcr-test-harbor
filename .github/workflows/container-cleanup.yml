@@ -31,7 +31,7 @@ jobs:
       - name: Get Container Tags
         run: |-
           gcloud container images list-tags "$IMAGE" \
-            --format=csv[no-heading](TAGS) \
+            --format "csv[no-heading](TAGS)" \
             > /tags.txt
 
       - name: Get Service Revision images
@@ -39,7 +39,7 @@ jobs:
           gcloud run revisions list \
             --service "$SERVICE_NAME" \
             --region "$RUN_REGION" \
-            --format=csv[no-heading](spec.containers.image) \
+            --format "csv[no-heading](spec.containers.image)" \
             | awk -F: '{print $2}' \
             > /image_tags.txt
 
