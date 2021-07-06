@@ -44,7 +44,7 @@ jobs:
             > tags.txt
 
       - name: Grep Matches tags->images_tags
-        run: grep -v -F -f /tags.txt /images_tags.txt
+        run: grep -v -F -f tags.txt images_tags.txt
 
       - name: Grep Matches images_tags->tags
-        run: grep -v -F -f /images_tags.txt /tags.txt
+        run: grep -v -F -f images_tags.txt tags.txt
