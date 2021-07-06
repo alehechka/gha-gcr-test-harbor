@@ -43,18 +43,11 @@ jobs:
             --format "csv[no-heading](TAGS)" \
             > tags.txt
 
-      - uses: actions/upload-artifact@v2
-        with:
-          name: image_tags
-          path: image_tags.txt
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: tags
-          path: tags.txt
-
       - name: Grep Matches image_tags->tags
-        run: grep -v -f image_tags.txt tags.txt
+        run: |-
+          echo "TAGS=`grep -v -f image_tags.txt tags.txt \
+          | awk -vORS=, '{ print $1 }' \
+          | sed 's/,$//'`" >> $GITHUB_ENV
 
-      - name: Grep Matches tags->image_tags
-        run: grep -v -F -f tags.txt image_tags.txt
+      - name: Printout Tags
+        run: echo "$TAGS"
