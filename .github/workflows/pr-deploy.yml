@@ -6,8 +6,8 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCR_PROJECT }}
-  RUN_REGION: us-central1
-  SERVICE_NAME: myservice
+  RUN_REGION: ${{ secrets.REGION }}
+  SERVICE_NAME: ${{ secrets.SERVICE }}
   PR_NUMBER: ${{ github.event.pull_request.number }}
 
 jobs:
@@ -114,6 +114,7 @@ jobs:
             | sed 's/,$//' \
             | sed 's/^[^,]*,//'`" >> $GITHUB_ENV
 
+      # WARNING: Deletes all Container images not currently being used by a Cloud Run Revision
       - name: Delete unused revision instances
         run: |-
           for revision in $(echo $REVISIONS | sed "s/,/ /g")

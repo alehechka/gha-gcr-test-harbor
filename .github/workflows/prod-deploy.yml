@@ -7,8 +7,8 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCR_PROJECT }}
-  RUN_REGION: us-central1
-  SERVICE_NAME: myservice
+  RUN_REGION: ${{ secrets.REGION }}
+  SERVICE_NAME: ${{ secrets.SERVICE }}
 
 jobs:
   build:
@@ -76,8 +76,8 @@ jobs:
           region: ${{ env.RUN_REGION }}
           revision_traffic: LATEST=100
 
-  cleanup:
-    name: GCR PR Merge Cleanup
+  cleanup-cloud-run:
+    name: Cloud Run Revision Cleanup
     needs: deploy-gcr
     runs-on: ubuntu-latest
 
@@ -114,4 +114,51 @@ jobs:
           for revision in $(echo $REVISIONS | sed "s/,/ /g")
           do
             gcloud run revisions delete "${revision}" --region "${RUN_REGION}" --quiet
+          done
+
+  cleanup-container-registry:
+    name: GCR PR Merge Cleanup
+    needs: cleanup-cloud-run
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@main
+
+      - name: Create Docker Tags
+        run: echo "IMAGE=gcr.io/$PROJECT_ID/$SERVICE_NAME" >> $GITHUB_ENV
+
+      - name: Setup gcloud CLI
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.GCR_SA_KEY }}
+          project_id: ${{ secrets.GCR_PROJECT }}
+          export_default_credentials: true
+
+      - name: Get Service Revision images
+        run: |-
+          gcloud run revisions list \
+            --service "$SERVICE_NAME" \
+            --region "$RUN_REGION" \
+            --format "csv[no-heading](spec.containers.image)" \
+            | awk -F: '{print $2}' \
+            > image_tags.txt
+
+      - name: Get Container Tags
+        run: |-
+          gcloud container images list-tags "$IMAGE" \
+            --format "csv[no-heading](TAGS)" \
+            > tags.txt
+
+      - name: Grep Matches image_tags->tags
+        run: |-
+          echo "TAGS=`grep -v -f image_tags.txt tags.txt \
+          | awk -vORS=, '{ print $1 }' \
+          | sed 's/,$//'`" >> $GITHUB_ENV
+
+      - name: Delete unused Container Images
+        run: |-
+          for TAG in $(echo $TAGS | sed "s/,/ /g")
+          do
+            gcloud container images delete "${IMAGE}:${TAG}" --force-delete-tags --quiet
           done
