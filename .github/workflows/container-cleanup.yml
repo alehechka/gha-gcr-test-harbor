@@ -28,12 +28,6 @@ jobs:
           project_id: ${{ secrets.GCR_PROJECT }}
           export_default_credentials: true
 
-      - name: Get Container Tags
-        run: |-
-          gcloud container images list-tags "$IMAGE" \
-            --format "csv[no-heading](TAGS)" \
-            > tags.txt
-
       - name: Get Service Revision images
         run: |-
           gcloud run revisions list \
@@ -42,6 +36,12 @@ jobs:
             --format "csv[no-heading](spec.containers.image)" \
             | awk -F: '{print $2}' \
             > image_tags.txt
+
+      - name: Get Container Tags
+        run: |-
+          gcloud container images list-tags "$IMAGE" \
+            --format "csv[no-heading](TAGS)" \
+            > tags.txt
 
       - name: Grep Matches tags->images_tags
         run: grep -v -F -f /tags.txt /images_tags.txt
