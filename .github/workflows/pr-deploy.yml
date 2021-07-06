@@ -1,6 +1,10 @@
 name: Google Cloud Run Revision Deploy
 on:
   pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
     branches:
       - main
 
@@ -87,6 +91,7 @@ jobs:
     name: Delete Unused Revision instances
     needs: deploy-gcr
     runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.action }} == 'synchronize'
 
     steps:
       - name: Checkout Repo
