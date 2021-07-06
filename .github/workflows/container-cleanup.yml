@@ -28,9 +28,6 @@ jobs:
           project_id: ${{ secrets.GCR_PROJECT }}
           export_default_credentials: true
 
-      - name: Authorize Docker push
-        run: gcloud auth configure-docker
-
       - name: Get Container Tags
         run: |-
           gcloud container images list-tags "$IMAGE" \
