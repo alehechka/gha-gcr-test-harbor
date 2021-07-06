@@ -37,14 +37,20 @@ jobs:
             | awk -F: '{print $2}' \
             > image_tags.txt
 
+      - name: Print Revision images
+        run: cat image_tags.txt
+
       - name: Get Container Tags
         run: |-
           gcloud container images list-tags "$IMAGE" \
             --format "csv[no-heading](TAGS)" \
             > tags.txt
 
-      - name: Grep Matches tags->images_tags
-        run: grep -v -F -f tags.txt images_tags.txt
+      - name: Print container tags
+        run: cat tags.txt
 
-      - name: Grep Matches images_tags->tags
-        run: grep -v -F -f images_tags.txt tags.txt
+      - name: Grep Matches tags->image_tags
+        run: grep -v -F -f tags.txt image_tags.txt
+
+      - name: Grep Matches image_tags->tags
+        run: grep -v -F -f image_tags.txt tags.txt
