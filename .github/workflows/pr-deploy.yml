@@ -1,13 +1,17 @@
 name: Google Cloud Run Revision Deploy
 on:
   pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
     branches:
       - main
 
 env:
   PROJECT_ID: ${{ secrets.GCR_PROJECT }}
-  RUN_REGION: us-central1
-  SERVICE_NAME: myservice
+  RUN_REGION: ${{ secrets.REGION }}
+  SERVICE_NAME: ${{ secrets.SERVICE }}
   PR_NUMBER: ${{ github.event.pull_request.number }}
 
 jobs:
@@ -87,6 +91,7 @@ jobs:
     name: Delete Unused Revision instances
     needs: deploy-gcr
     runs-on: ubuntu-latest
+    if: ${{ github.event.action == 'synchronize' }}
 
     steps:
       - name: Checkout Repo
@@ -114,6 +119,7 @@ jobs:
             | sed 's/,$//' \
             | sed 's/^[^,]*,//'`" >> $GITHUB_ENV
 
+      # WARNING: Deletes all Container images not currently being used by a Cloud Run Revision
       - name: Delete unused revision instances
         run: |-
           for revision in $(echo $REVISIONS | sed "s/,/ /g")
