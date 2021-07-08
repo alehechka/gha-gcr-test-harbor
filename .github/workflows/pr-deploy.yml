@@ -38,14 +38,6 @@ jobs:
       - name: Build
         run: go build -v .
 
-  print-status:
-    name: Print Action Status
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Print github
-        run: echo ${{ toJson(github) }}
-
   deploy-gcr:
     name: Deploy Revision Tag to GCR
     needs: build
@@ -99,7 +91,7 @@ jobs:
     name: Delete Unused Revision instances
     needs: deploy-gcr
     runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.action == 'synchronize' }}
+    if: ${{ github.event.action == 'synchronize' }}
 
     steps:
       - name: Checkout Repo
