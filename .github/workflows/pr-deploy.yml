@@ -43,18 +43,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Print event
-        # This didn't work, need to figure out what the hell I need to read to match with synchronize
-        run: |-
-          mkdir -p artifact
-          echo ${{ github }} > artifact/github.txt
-          echo ${{ github.event }} > artifact/event.txt
-          echo ${{ github.event.pull_request }} > artifact/pr.txt
+      - name: Print github
+        run: echo ${{ github }} | jg '.'
 
-      - uses: actions/upload-artifact@v2
-        with:
-          name: context
-          path: artifact
+      - name: Print github.event
+        run: echo ${{ github.event }} | jg '.'
+
+      - name: Print github.event.pull_request
+        run: echo ${{ github.event.pull_request }} | jg '.'
 
   deploy-gcr:
     name: Deploy Revision Tag to GCR
