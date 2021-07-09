@@ -91,7 +91,6 @@ jobs:
     name: Delete Unused Revision instances
     needs: deploy-gcr
     runs-on: ubuntu-latest
-    if: ${{ github.event.action == 'synchronize' }}
 
     steps:
       - name: Checkout Repo
@@ -113,11 +112,11 @@ jobs:
             --service "${SERVICE_NAME}" \
             --region "${RUN_REGION}" \
             --filter "spec.containers.image ~ ${IMAGE_REGX}" \
-            --format "csv[no-heading](metadata.name)" \
-            --sort-by=~metadata.name \
-            | awk -vORS=, '{ print $1 }' \
+            --format "csv[no-heading](REVISION,ACTIVE)" \
+            | awk -F, '$2 != "yes"' \
             | sed 's/,$//' \
-            | sed 's/^[^,]*,//'`" >> $GITHUB_ENV
+            | awk -vORS=, '{ print $1 }' \
+            | sed 's/,$//'`" >> $GITHUB_ENV
 
       # WARNING: Deletes all Container images not currently being used by a Cloud Run Revision
       - name: Delete unused revision instances
