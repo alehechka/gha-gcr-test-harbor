@@ -91,7 +91,6 @@ jobs:
     name: Delete Unused Revision instances
     needs: deploy-gcr
     runs-on: ubuntu-latest
-    # if: ${{ github.event.action == 'synchronize' }}
 
     steps:
       - name: Checkout Repo
